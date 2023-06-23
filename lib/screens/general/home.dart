@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:anxeb_flutter/anxeb.dart' as anxeb;
+import 'package:todo_app/forms/task.dart';
 import 'package:todo_app/screens/landing/about.dart';
 import 'package:todo_app/screens/general/profile.dart';
 import 'package:todo_app/middleware/application.dart';
@@ -37,6 +38,7 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
     application.overlay.brightness = Brightness.dark;
     application.overlay.apply(instant: true);
   }
+  
 
   @override
   Future init() async {
@@ -129,6 +131,28 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       ],
     );
   }
+    @override
+  anxeb.ActionsFooter footer() {
+    return anxeb.ActionsFooter(
+      scope: scope,
+      actions: <anxeb.ActionIcon>[
+        anxeb.ActionIcon(
+          icon: () => Icons.refresh,
+          onPressed: () => _refresh(),
+        ),
+      ],
+    );
+  }
+    @override
+  anxeb.ScreenAction action() {
+    return anxeb.ScreenAction(
+      scope: scope,
+      onPressed: () {
+        _onSelectTask(null);
+      },
+      icon: () => Icons.add,
+    );
+  }
 
   @override
   anxeb.ActionsHeader header() {
@@ -165,7 +189,6 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
     } finally {
       await scope.idle();
     }
-
     return tasks;
   }
 
@@ -175,7 +198,6 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
     });
 
     _tasks = _tasksFiltered = await _getTasks();
-
     rasterize(() {
       _refreshing = false;
     });
@@ -215,11 +237,33 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       child: ListTasks(
         tasks: tasks,
         onSelectTask: _onSelectTask,
+        onDeleteTask: _deleteTask,
       ),
     );
+    
   }
 
-  void _onSelectTask(TaskModel task) async {}
+  void _onSelectTask(TaskModel task) async {
+    if (task != null) {     
+     task.using(scope).fetch(success: (helper) async {
+      final form = TaskForm(scope: scope, task: task);
+      await form.show();
+    });
+    } else {
+      final form = TaskForm(scope: scope);
+      await form.show();
+    }
+          _refresh();
+  }
+
+  void _deleteTask(TaskModel task) async {
+    try {
+      await scope.api.delete('/tasks/${task.id}');
+  _refresh();
+    } catch (err) {
+      scope.alerts.error(err).show();
+    }
+  }
 
   Future _onSearch(String text) async {
     if (text.isNotEmpty) {
@@ -243,6 +287,7 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       _tasksFiltered = _tasks;
     });
   }
+
 
   Session get session => application.session;
 

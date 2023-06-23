@@ -6,10 +6,11 @@ abstract class GlobalSettings {
   final String firebaseKey;
   final String sentryDSN;
 
+
   bool get isTest;
 
   factory GlobalSettings(mode) {
-    return mode == 'test' ? GlobalSettingsTest() : GlobalSettingsLive();
+    return GlobalSettingsTest();
   }
 }
 
@@ -20,12 +21,13 @@ class GlobalSettingsLive implements GlobalSettings {
   final String sentryDSN =
       'https://b9d19facc83443e79d6dcc0ab805efa0@o157936.ingest.sentry.io/4505349707988992';
 
+
   bool get isTest => false;
 }
 
 class GlobalSettingsTest extends GlobalSettingsLive {
-  final String apiUrl = 'http://10.0.0.114:6401';
-  final String backendUrl = 'http://10.0.0.114:5180';
+  final String apiUrl = 'https://66e5-82-213-205-71.ngrok-free.app';
+  final String backendUrl = 'https://66e5-82-213-205-71.ngrok-free.app';
 
   bool get isTest => true;
 }
