@@ -189,6 +189,7 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
     } finally {
       await scope.idle();
     }
+
     return tasks;
   }
 
@@ -238,6 +239,7 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
         tasks: tasks,
         onSelectTask: _onSelectTask,
         onDeleteTask: _deleteTask,
+        onDismissedTask : _dismissedTask,
       ),
     );
     
@@ -250,13 +252,14 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       await form.show();
     });
     } else {
-      final form = TaskForm(scope: scope);
+      TaskModel(task);
+      final form = TaskForm(scope: scope, task: task);
       await form.show();
     }
-          _refresh();
+    _refresh();
   }
 
-  void _deleteTask(TaskModel task) async {
+  void _dismissedTask(TaskModel task) async {
     try {
       await scope.api.delete('/tasks/${task.id}');
   _refresh();
@@ -264,6 +267,18 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       scope.alerts.error(err).show();
     }
   }
+    void _deleteTask(TaskModel task) async {
+    if (task != null) {
+    try {
+      task.using(scope).delete(success: (helper) async {
+       await _refresh();
+    });
+    } catch (err) {
+      scope.alerts.error(err).show();
+    }
+    }
+  }
+
 
   Future _onSearch(String text) async {
     if (text.isNotEmpty) {

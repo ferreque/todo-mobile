@@ -5,12 +5,14 @@ class ListTasks extends StatelessWidget {
   final List<TaskModel> tasks;
   final Function(TaskModel) onSelectTask;
   final Function(TaskModel) onDeleteTask;
+    final Function(TaskModel) onDismissedTask;
 
   const ListTasks({
     Key key,
     this.tasks,
     this.onSelectTask,
     this.onDeleteTask,
+        this.onDismissedTask,
   }) : super(key: key);
 
   @override
@@ -21,7 +23,7 @@ class ListTasks extends StatelessWidget {
         final task = tasks[index];
         return Dismissible(
           key: UniqueKey(),
-          onDismissed:(direction){ onDeleteTask(task);},
+          onDismissed:(direction){ onDismissedTask(task);},
         background: Container(color: Colors.red),
           child: Card(
             child: GestureDetector(
@@ -43,11 +45,13 @@ class TaskTile extends StatelessWidget {
   final Function(TaskModel) onSelectTask;
   final Function(TaskModel) onDeleteTask;
 
+
   const TaskTile({
     Key key,
     this.task,
     this.onSelectTask,
     this.onDeleteTask,
+
   }) : super(key: key);
 
   @override

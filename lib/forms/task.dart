@@ -72,6 +72,13 @@ class TaskForm extends anxeb.FormDialog<TaskModel, Application> {
   List<anxeb.FormButton> buttons(anxeb.FormScope<Application> scope) {
     return [
       anxeb.FormButton(
+        visible: !exists,
+        caption: 'Crear',
+        onTap: (anxeb.FormScope scope) => _create(scope),
+        icon: Icons.check,
+      ),
+      anxeb.FormButton(
+        visible: exists,
         caption: 'Guardar',
         onTap: (anxeb.FormScope scope) => _persist(scope),
         icon: Icons.check,
@@ -84,11 +91,6 @@ class TaskForm extends anxeb.FormDialog<TaskModel, Application> {
     ];
   }
 
-  // Future _delete(anxeb.FormScope scope) async {
-  //   return await _task.using(scope).delete(success: (helper) async {
-  //     scope.parent.alerts.success('Tarea eliminada exitosamente').show();
-  //   });
-  // }
 
   Future _persist(anxeb.FormScope scope) async {
     final form = scope.forms['task'];
@@ -112,6 +114,20 @@ class TaskForm extends anxeb.FormDialog<TaskModel, Application> {
     }
   }
 
-  @override
+  Future _create(anxeb.FormScope scope) async {
+    final form = scope.forms['task'];
+    if (form.valid(autoFocus: true)) {
+      await _task.using(scope.parent).insert(
+        success: (helper) async {
+            scope.parent.alerts
+                .success('Tarea creada exitosamente')
+                .show();
+                      Navigator.of(scope.context);   
+        },
+      );
+    }
+  }
+
+@override
   Future Function(anxeb.FormScope scope) get close => (scope) async => true;
 }
