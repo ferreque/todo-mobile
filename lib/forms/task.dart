@@ -14,11 +14,12 @@ class TaskForm extends anxeb.FormDialog<TaskModel, Application> {
           title: task == null ? 'Nueva Tarea' : 'Editar Tarea',
           icon: task == null ? Icons.task : Icons.edit_square,
           width: double.maxFinite,
-        ) ;
+        );
 
   @override
   void init(anxeb.FormScope scope) {
     _task = TaskModel();
+    print(_task);
     _task.update(model);
   }
 
@@ -83,14 +84,13 @@ class TaskForm extends anxeb.FormDialog<TaskModel, Application> {
         onTap: (anxeb.FormScope scope) => _persist(scope),
         icon: Icons.check,
       ),
-            anxeb.FormButton(
+      anxeb.FormButton(
         caption: exists ? 'Cerrar' : 'Cancelar',
         onTap: (anxeb.Scope scope) async => true,
         icon: Icons.close,
       )
     ];
   }
-
 
   Future _persist(anxeb.FormScope scope) async {
     final form = scope.forms['task'];
@@ -101,11 +101,10 @@ class TaskForm extends anxeb.FormDialog<TaskModel, Application> {
             scope.parent.alerts
                 .success('Tarea actualizada exitosamente')
                 .show();
-                      Navigator.of(scope.context);
+            Navigator.of(scope.context);
             scope.parent.rasterize(() {
               model.update(_task);
             });
-            
           } else {
             scope.parent.alerts.success('Tarea creada exitosamente').show();
           }
@@ -119,15 +118,13 @@ class TaskForm extends anxeb.FormDialog<TaskModel, Application> {
     if (form.valid(autoFocus: true)) {
       await _task.using(scope.parent).insert(
         success: (helper) async {
-            scope.parent.alerts
-                .success('Tarea creada exitosamente')
-                .show();
-                      Navigator.of(scope.context);   
+          scope.parent.alerts.success('Tarea creada exitosamente').show();
+          Navigator.of(scope.context);
         },
       );
     }
   }
 
-@override
+  @override
   Future Function(anxeb.FormScope scope) get close => (scope) async => true;
 }

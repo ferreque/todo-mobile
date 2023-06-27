@@ -9,11 +9,13 @@ class TaskModel extends anxeb.HelpedModel<TaskModel, TaskHelper> {
     field(() => id, (v) => id = v, 'id', primary: true);
     field(() => name, (v) => name = v, 'name');
     field(() => description, (v) => description = v, 'description');
+    field(() => user, (v) => user = v, 'user');
   }
 
   String id;
   String name;
   String description;
+  String user;
 
   @override
   TaskHelper helper() => TaskHelper();

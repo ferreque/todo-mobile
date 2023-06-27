@@ -38,7 +38,6 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
     application.overlay.brightness = Brightness.dark;
     application.overlay.apply(instant: true);
   }
-  
 
   @override
   Future init() async {
@@ -131,7 +130,8 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       ],
     );
   }
-    @override
+
+  @override
   anxeb.ActionsFooter footer() {
     return anxeb.ActionsFooter(
       scope: scope,
@@ -143,7 +143,8 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       ],
     );
   }
-    @override
+
+  @override
   anxeb.ScreenAction action() {
     return anxeb.ScreenAction(
       scope: scope,
@@ -158,7 +159,7 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
   anxeb.ActionsHeader header() {
     return anxeb.SearchHeader(
         scope: scope,
-        submitDelay: () => 150,
+        submitDelay: () => 50,
         onBegin: () async {},
         onClear: _onClear,
         onSearch: _onSearch,
@@ -239,18 +240,18 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
         tasks: tasks,
         onSelectTask: _onSelectTask,
         onDeleteTask: _deleteTask,
-        onDismissedTask : _dismissedTask,
+        onDismissedTask: _dismissedTask,
       ),
     );
-    
   }
 
   void _onSelectTask(TaskModel task) async {
-    if (task != null) {     
-     task.using(scope).fetch(success: (helper) async {
-      final form = TaskForm(scope: scope, task: task);
-      await form.show();
-    });
+    if (task != null) {
+      task.using(scope).fetch(success: (helper) async {
+        final form = TaskForm(scope: scope, task: task);
+        await form.show();
+        _refresh();
+      });
     } else {
       TaskModel(task);
       final form = TaskForm(scope: scope, task: task);
@@ -262,34 +263,34 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
   void _dismissedTask(TaskModel task) async {
     try {
       await scope.api.delete('/tasks/${task.id}');
-  _refresh();
+      _refresh();
     } catch (err) {
       scope.alerts.error(err).show();
     }
   }
-    void _deleteTask(TaskModel task) async {
+
+  void _deleteTask(TaskModel task) async {
     if (task != null) {
-    try {
-      task.using(scope).delete(success: (helper) async {
-       await _refresh();
-    });
-    } catch (err) {
-      scope.alerts.error(err).show();
-    }
-    }
-  }
-
-
-  Future _onSearch(String text) async {
-    if (text.isNotEmpty) {
       try {
-        final results = _tasks.where((e) => e.id.startsWith(text))?.toList();
-        rasterize(() {
-          _tasksFiltered = results ?? [];
+        task.using(scope).delete(success: (helper) async {
+          await _refresh();
         });
       } catch (err) {
         scope.alerts.error(err).show();
       }
+    }
+  }
+
+  Future _onSearch(String text) async {
+    try {
+      final results = _tasks
+          .where((e) => e.name.contains(text) || e.description.contains(text))
+          ?.toList();
+      rasterize(() {
+        _tasksFiltered = results ?? [];
+      });
+    } catch (err) {
+      scope.alerts.error(err).show();
     }
   }
 
@@ -302,7 +303,6 @@ class _HomeState extends anxeb.ScreenView<HomeScreen, Application> {
       _tasksFiltered = _tasks;
     });
   }
-
 
   Session get session => application.session;
 

@@ -2,13 +2,14 @@ import 'package:anxeb_flutter/anxeb.dart' as anxeb;
 import 'package:todo_app/models/primary/task.dart';
 import 'package:todo_app/middleware/application.dart';
 import 'package:todo_app/services/task.dart';
+import 'package:todo_app/middleware/session.dart';
 
 class TaskHelper extends anxeb.ModelHelper<TaskModel> {
   Application get application => scope.application;
 
   TaskService get service => application.service.task;
 
-    @override
+  @override
   Future<TaskModel> delete({Future Function(TaskHelper) success}) async {
     if (model.id != null) {
       var result = await scope.dialogs
@@ -34,7 +35,10 @@ class TaskHelper extends anxeb.ModelHelper<TaskModel> {
   }
 
   Future<TaskModel> fetch(
-      {String id, Future Function(TaskHelper) success, Future Function(TaskHelper) next, bool silent}) async {
+      {String id,
+      Future Function(TaskHelper) success,
+      Future Function(TaskHelper) next,
+      bool silent}) async {
     if (silent != true) {
       await scope.busy(text: 'Cargando Tarea...');
     }
@@ -42,7 +46,7 @@ class TaskHelper extends anxeb.ModelHelper<TaskModel> {
       final data = await scope.api.get('/tasks/${id ?? model.id}');
       scope.rasterize(() {
         model.update(data);
-      }); 
+      });
       await next?.call(this);
       if (silent != true) {
         await scope.idle();
@@ -58,17 +62,20 @@ class TaskHelper extends anxeb.ModelHelper<TaskModel> {
     return null;
   }
 
-  Future<TaskModel> update({Future Function(TaskHelper) success, Future Function(TaskHelper) next, bool silent}) async {
-
+  Future<TaskModel> update(
+      {Future Function(TaskHelper) success,
+      Future Function(TaskHelper) next,
+      bool silent}) async {
     try {
-      final data = await scope.api.put('/tasks/${model.id}', {'task': model.toObjects()});
-          if (silent != true) {
-      await scope.busy(text: 'Actualizando Tarea...');
-    }
+      final data = await scope.api
+          .put('/tasks/${model.id}', {'task': model.toObjects()});
+      if (silent != true) {
+        await scope.busy(text: 'Actualizando Tarea...');
+      }
       scope.rasterize(() {
         model.update(data);
       });
-       await next?.call(this);
+      await next?.call(this);
       if (silent != true) {
         await scope.idle();
       }
@@ -84,16 +91,21 @@ class TaskHelper extends anxeb.ModelHelper<TaskModel> {
     return null;
   }
 
-    Future<TaskModel> insert({Future Function(TaskHelper) success, Future Function(TaskHelper) next, bool silent}) async {
+  Future<TaskModel> insert(
+      {Future Function(TaskHelper) success,
+      Future Function(TaskHelper) next,
+      bool silent}) async {
+    final user = session.user.lightName;
+    model.user = user;
     try {
       final data = await scope.api.post('/tasks', {'task': model.toObjects()});
-       if (silent != true) {
-      await scope.busy(text: 'Creando Tarea...');
-    }
+      if (silent != true) {
+        await scope.busy(text: 'Creando Tarea...');
+      }
       scope.rasterize(() {
         model.update(data);
       });
-       await next?.call(this);
+      await next?.call(this);
       if (silent != true) {
         await scope.idle();
       }
@@ -109,6 +121,5 @@ class TaskHelper extends anxeb.ModelHelper<TaskModel> {
     return null;
   }
 
-
-
+  Session get session => application.session;
 }
